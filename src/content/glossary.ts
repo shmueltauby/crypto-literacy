@@ -1,0 +1,27 @@
+export type GlossaryTerm = { term: string; definition: string };
+
+export const glossary: GlossaryTerm[] = [
+  { term: 'Address', definition: 'A string of letters and numbers that works like an account number. Safe to share to receive funds.' },
+  { term: 'Altcoin', definition: 'Any cryptocurrency other than Bitcoin.' },
+  { term: 'Bitcoin (BTC)', definition: 'The first cryptocurrency, launched in 2009, with a supply capped at 21 million coins.' },
+  { term: 'Block', definition: 'A batch of transactions added to a blockchain together.' },
+  { term: 'Blockchain', definition: 'A shared record of transactions kept by many computers, where each block is linked to the one before it.' },
+  { term: 'Custodial', definition: 'A service that holds your private keys for you, such as an exchange.' },
+  { term: 'DeFi', definition: 'Decentralised finance: lending, trading and similar services run by smart contracts instead of companies.' },
+  { term: 'Ether (ETH)', definition: 'The coin of the Ethereum network, used to pay its fees.' },
+  { term: 'Exchange', definition: 'A company or app where you swap regular money for crypto, or one crypto for another.' },
+  { term: 'Gas', definition: 'The fee paid to a network, especially Ethereum, to process a transaction.' },
+  { term: 'Hash', definition: 'A short fingerprint of data. Any change to the data produces a completely different hash.' },
+  { term: 'Mining', definition: 'Using computing power to add blocks to a proof-of-work blockchain such as Bitcoin, in return for new coins.' },
+  { term: 'NFT', definition: 'A token that is one of a kind, often used to record ownership of a digital item.' },
+  { term: 'Private key', definition: 'The secret that controls the coins at an address. Whoever has it can spend them.' },
+  { term: 'Proof of stake', definition: 'A system where validators lock up coins as a deposit for the right to add blocks.' },
+  { term: 'Proof of work', definition: 'A system where miners compete with computing power for the right to add blocks.' },
+  { term: 'Rug pull', definition: 'A scam where the creators of a token take investors’ money and disappear.' },
+  { term: 'Seed phrase', definition: 'A list of 12 or 24 words that backs up a wallet. Anyone who has it controls the wallet.' },
+  { term: 'Self-custody', definition: 'Holding your own private keys, so no company can move or freeze your coins.' },
+  { term: 'Smart contract', definition: 'A program stored on a blockchain that runs automatically, exactly as written.' },
+  { term: 'Stablecoin', definition: 'A token designed to stay worth one unit of a regular currency, usually one US dollar.' },
+  { term: 'Token', definition: 'A digital asset created on top of an existing blockchain.' },
+  { term: 'Wallet', definition: 'An app or device that stores your private keys and lets you send and receive crypto.' },
+];

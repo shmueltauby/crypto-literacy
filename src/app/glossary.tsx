@@ -1,0 +1,65 @@
+import { useState } from 'react';
+import { StyleSheet, TextInput } from 'react-native';
+
+import { Screen } from '@/components/screen';
+import { ThemedText } from '@/components/themed-text';
+import { ThemedView } from '@/components/themed-view';
+import { Spacing } from '@/constants/theme';
+import { glossary } from '@/content/glossary';
+import { useTheme } from '@/hooks/use-theme';
+
+export default function GlossaryScreen() {
+  const theme = useTheme();
+  const [query, setQuery] = useState('');
+  const needle = query.trim().toLowerCase();
+  const terms = glossary.filter(
+    ({ term, definition }) =>
+      term.toLowerCase().includes(needle) || definition.toLowerCase().includes(needle),
+  );
+
+  return (
+    <Screen>
+      <ThemedText type="subtitle">Glossary</ThemedText>
+      <TextInput
+        value={query}
+        onChangeText={setQuery}
+        placeholder="Search terms"
+        placeholderTextColor={theme.textSecondary}
+        autoCorrect={false}
+        style={[styles.search, { color: theme.text, backgroundColor: theme.backgroundElement }]}
+      />
+
+      {terms.map(({ term, definition }) => (
+        <ThemedView key={term} type="backgroundElement" style={styles.card}>
+          <ThemedText type="smallBold" style={styles.term}>
+            {term}
+          </ThemedText>
+          <ThemedText type="small" themeColor="textSecondary">
+            {definition}
+          </ThemedText>
+        </ThemedView>
+      ))}
+
+      {terms.length === 0 && (
+        <ThemedText themeColor="textSecondary">No terms match “{query.trim()}”.</ThemedText>
+      )}
+    </Screen>
+  );
+}
+
+const styles = StyleSheet.create({
+  search: {
+    fontSize: 16,
+    paddingVertical: Spacing.two + Spacing.half,
+    paddingHorizontal: Spacing.three,
+    borderRadius: Spacing.three,
+  },
+  card: {
+    gap: Spacing.one,
+    padding: Spacing.three,
+    borderRadius: Spacing.three,
+  },
+  term: {
+    fontSize: 16,
+  },
+});
