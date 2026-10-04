@@ -1,4 +1,3 @@
-import { Nunito_600SemiBold, Nunito_800ExtraBold } from '@expo-google-fonts/nunito';
 import { useFonts } from 'expo-font';
 import { DarkTheme, DefaultTheme, ThemeProvider } from 'expo-router';
 import { StyleSheet, useColorScheme } from 'react-native';
@@ -18,7 +17,10 @@ function OnboardingGate() {
 
 export default function TabLayout() {
   const colorScheme = useColorScheme();
-  useFonts({ Nunito_600SemiBold, Nunito_800ExtraBold });
+  useFonts({
+    Nunito_600SemiBold: require('@/assets/fonts/Nunito_600SemiBold.ttf'),
+    Nunito_800ExtraBold: require('@/assets/fonts/Nunito_800ExtraBold.ttf'),
+  });
 
   return (
     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
