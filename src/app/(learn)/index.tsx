@@ -1,71 +1,113 @@
-import { Link } from 'expo-router';
+import { router } from 'expo-router';
 import { Pressable, StyleSheet, View } from 'react-native';
 
+import { CryptoCan } from '@/components/crypto-can';
 import { Screen } from '@/components/screen';
+import { SpeechBubble } from '@/components/speech-bubble';
 import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
 import { Spacing } from '@/constants/theme';
 import { lessons } from '@/content/lessons';
 import { useProgress } from '@/hooks/use-progress';
 import { useTheme } from '@/hooks/use-theme';
 
+// Sideways shift of each stop on the path, so it winds like a trail.
+const PATH_OFFSETS = [0, 56, 84, 56, 0, -56, -84, -56];
+const NODE_SIZE = 76;
+
 export default function LearnScreen() {
   const theme = useTheme();
-  const { completed } = useProgress();
-  const doneCount = lessons.filter((lesson) => completed.includes(lesson.id)).length;
+  const { completed, xp, streak, name } = useProgress();
+
+  const nextIndex = lessons.findIndex((lesson) => !completed.includes(lesson.id));
+  const allDone = nextIndex === -1;
+  const greeting = allDone
+    ? 'You finished every lesson! Tap any stop to practise again.'
+    : completed.length === 0
+      ? `${name ? `Hi ${name}! ` : ''}Tap the green circle to start your first lesson.`
+      : `${name ? `Nice work, ${name}! ` : 'Nice work! '}Next up: ${lessons[nextIndex].title}`;
 
   return (
     <Screen>
-      <ThemedText type="subtitle">Learn crypto</ThemedText>
-      <ThemedText themeColor="textSecondary">
-        Short lessons in plain language. Free, with no sign-up.
-      </ThemedText>
+      <View style={styles.stats}>
+        <View style={[styles.stat, { borderColor: theme.border }]}>
+          <ThemedText type="smallBold" style={styles.statText}>
+            🔥 {streak} day streak
+          </ThemedText>
+        </View>
+        <View style={[styles.stat, { borderColor: theme.border }]}>
+          <ThemedText type="smallBold" style={styles.statText}>
+            ⚡ {xp} XP
+          </ThemedText>
+        </View>
+      </View>
 
-      <View style={styles.progress}>
-        <ThemedView type="backgroundElement" style={styles.progressTrack}>
-          <View
-            style={[
-              styles.progressFill,
-              { backgroundColor: theme.accent, width: `${(doneCount / lessons.length) * 100}%` },
-            ]}
-          />
-        </ThemedView>
-        <ThemedText type="small" themeColor="textSecondary">
-          {doneCount} of {lessons.length} lessons completed
+      <View style={styles.hero}>
+        <CryptoCan size={96} mood={allDone ? 'cheer' : 'happy'} />
+        <SpeechBubble style={styles.heroBubble}>
+          <ThemedText type="smallBold" style={styles.heroText}>
+            {greeting}
+          </ThemedText>
+        </SpeechBubble>
+      </View>
+
+      <View style={[styles.unit, { backgroundColor: theme.primary, borderColor: theme.primaryShade }]}>
+        <ThemedText type="smallBold" style={styles.unitLabel}>
+          UNIT 1
+        </ThemedText>
+        <ThemedText type="smallBold" style={styles.unitTitle}>
+          Crypto basics
+        </ThemedText>
+        <ThemedText type="small" style={styles.unitLabel}>
+          {completed.length} of {lessons.length} lessons complete
         </ThemedText>
       </View>
 
-      {lessons.map((lesson, index) => {
-        const done = completed.includes(lesson.id);
-        return (
-          <Link key={lesson.id} href={{ pathname: '/lesson/[id]', params: { id: lesson.id } }} asChild>
-            <Pressable style={({ pressed }) => pressed && styles.pressed}>
-              <ThemedView type="backgroundElement" style={styles.card}>
-                <View
-                  style={[
-                    styles.badge,
-                    { backgroundColor: done ? theme.success : theme.backgroundSelected },
-                  ]}>
-                  <ThemedText type="smallBold" style={done && styles.badgeDoneText}>
-                    {done ? '✓' : index + 1}
+      <View style={styles.path}>
+        {lessons.map((lesson, index) => {
+          const done = completed.includes(lesson.id);
+          const current = index === nextIndex;
+          const locked = !done && !current;
+          const colors = done
+            ? { face: theme.gold, edge: theme.goldShade }
+            : current
+              ? { face: theme.primary, edge: theme.primaryShade }
+              : { face: theme.backgroundSelected, edge: theme.border };
+
+          return (
+            <View
+              key={lesson.id}
+              style={[styles.stop, { left: PATH_OFFSETS[index % PATH_OFFSETS.length] }]}>
+              {current && (
+                <View style={[styles.startTag, { backgroundColor: theme.background, borderColor: theme.border }]}>
+                  <ThemedText type="smallBold" style={{ color: theme.primary }}>
+                    START
                   </ThemedText>
                 </View>
-                <View style={styles.cardText}>
-                  <ThemedText type="smallBold" style={styles.cardTitle}>
-                    {lesson.title}
-                  </ThemedText>
-                  <ThemedText type="small" themeColor="textSecondary">
-                    {lesson.summary}
-                  </ThemedText>
-                  <ThemedText type="small" themeColor="textSecondary">
-                    {lesson.minutes} min
-                  </ThemedText>
-                </View>
-              </ThemedView>
-            </Pressable>
-          </Link>
-        );
-      })}
+              )}
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel={`${lesson.title}${locked ? ', locked' : ''}`}
+                disabled={locked}
+                onPress={() => router.push({ pathname: '/lesson/[id]', params: { id: lesson.id } })}
+                style={({ pressed }) => [
+                  styles.node,
+                  { backgroundColor: colors.face, borderColor: colors.edge },
+                  pressed && styles.nodePressed,
+                ]}>
+                <ThemedText style={[styles.nodeEmoji, locked && styles.locked]}>
+                  {locked ? '🔒' : lesson.emoji}
+                </ThemedText>
+              </Pressable>
+              <ThemedText
+                type="smallBold"
+                themeColor={locked ? 'textSecondary' : 'text'}
+                style={styles.stopTitle}>
+                {lesson.title}
+              </ThemedText>
+            </View>
+          );
+        })}
+      </View>
 
       <ThemedText type="small" themeColor="textSecondary" style={styles.disclaimer}>
         This app is for education only and is not financial advice.
@@ -75,46 +117,86 @@ export default function LearnScreen() {
 }
 
 const styles = StyleSheet.create({
-  progress: {
+  stats: {
+    flexDirection: 'row',
     gap: Spacing.two,
   },
-  progressTrack: {
-    height: Spacing.two,
-    borderRadius: Spacing.one,
-    overflow: 'hidden',
+  stat: {
+    borderWidth: 2,
+    borderRadius: Spacing.three,
+    paddingVertical: Spacing.one,
+    paddingHorizontal: Spacing.three,
   },
-  progressFill: {
-    height: '100%',
+  statText: {
+    fontSize: 15,
   },
-  card: {
+  hero: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: Spacing.three,
-    padding: Spacing.three,
-    borderRadius: Spacing.three,
   },
-  cardText: {
+  heroBubble: {
     flex: 1,
-    gap: Spacing.half,
   },
-  cardTitle: {
+  heroText: {
     fontSize: 16,
+    lineHeight: 22,
   },
-  badge: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
+  unit: {
+    borderRadius: Spacing.three,
+    borderBottomWidth: 4,
+    paddingVertical: Spacing.three,
+    paddingHorizontal: Spacing.four,
+  },
+  unitLabel: {
+    color: '#ffffff',
+    opacity: 0.9,
+  },
+  unitTitle: {
+    color: '#ffffff',
+    fontSize: 22,
+    lineHeight: 30,
+  },
+  path: {
+    alignItems: 'center',
+    gap: Spacing.four,
+    paddingVertical: Spacing.three,
+  },
+  stop: {
+    alignItems: 'center',
+    gap: Spacing.two,
+    width: 180,
+  },
+  startTag: {
+    borderWidth: 2,
+    borderRadius: Spacing.two,
+    paddingVertical: Spacing.half,
+    paddingHorizontal: Spacing.two,
+  },
+  node: {
+    width: NODE_SIZE,
+    height: NODE_SIZE,
+    borderRadius: NODE_SIZE / 2,
+    borderBottomWidth: 7,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  badgeDoneText: {
-    color: '#ffffff',
+  nodePressed: {
+    borderBottomWidth: 2,
+    height: NODE_SIZE - 5,
+    marginTop: 5,
   },
-  pressed: {
-    opacity: 0.7,
+  nodeEmoji: {
+    fontSize: 30,
+    lineHeight: 38,
+  },
+  locked: {
+    opacity: 0.5,
+  },
+  stopTitle: {
+    textAlign: 'center',
   },
   disclaimer: {
     textAlign: 'center',
-    marginTop: Spacing.three,
   },
 });

@@ -9,24 +9,44 @@ import { Platform } from 'react-native';
 
 export const Colors = {
   light: {
-    text: '#000000',
+    text: '#2B3238',
     background: '#ffffff',
-    backgroundElement: '#F0F0F3',
-    backgroundSelected: '#E0E1E6',
-    textSecondary: '#60646C',
-    accent: '#1B76D2',
+    backgroundElement: '#F2F4F7',
+    backgroundSelected: '#E3E7EC',
+    textSecondary: '#6B7480',
+    border: '#E3E7EC',
+    primary: '#32B950',
+    primaryShade: '#24903C',
+    accent: '#1CA4F0',
+    accentShade: '#1483C4',
+    accentSoft: '#DDF2FF',
+    gold: '#FFC83D',
+    goldShade: '#E0A500',
     success: '#1F9D55',
-    danger: '#D64545',
+    successSoft: '#DDF7E3',
+    danger: '#E5484D',
+    dangerShade: '#B93338',
+    dangerSoft: '#FFE3E3',
   },
   dark: {
-    text: '#ffffff',
-    background: '#000000',
-    backgroundElement: '#212225',
-    backgroundSelected: '#2E3135',
-    textSecondary: '#B0B4BA',
-    accent: '#4BA3F5',
-    success: '#34B36B',
+    text: '#F1F5F8',
+    background: '#12181C',
+    backgroundElement: '#1E262C',
+    backgroundSelected: '#2B363D',
+    textSecondary: '#A3AEB8',
+    border: '#34414A',
+    primary: '#3CCB5C',
+    primaryShade: '#2A9D45',
+    accent: '#3DB4F5',
+    accentShade: '#1E8FD0',
+    accentSoft: '#15303F',
+    gold: '#FFC83D',
+    goldShade: '#E0A500',
+    success: '#4CD27A',
+    successSoft: '#173524',
     danger: '#F0625F',
+    dangerShade: '#B93338',
+    dangerSoft: '#3D1F1F',
   },
 } as const;
 
@@ -65,6 +85,11 @@ export const Spacing = {
   four: 24,
   five: 32,
   six: 64,
+} as const;
+
+export const FontFamily = {
+  regular: 'Nunito_600SemiBold',
+  bold: 'Nunito_800ExtraBold',
 } as const;
 
 export const BottomTabInset = Platform.select({ ios: 50, android: 80 }) ?? 0;

@@ -6,6 +6,7 @@ import {
   TabTriggerSlotProps,
   TabListProps,
 } from 'expo-router/ui';
+import { usePathname } from 'expo-router';
 import { Pressable, View, StyleSheet } from 'react-native';
 
 import { ThemedText } from './themed-text';
@@ -46,11 +47,14 @@ export function TabButton({ children, isFocused, ...props }: TabTriggerSlotProps
 }
 
 export function CustomTabList(props: TabListProps) {
+  // Lessons are full screen so nothing distracts from them.
+  const inLesson = usePathname().startsWith('/lesson');
+
   return (
-    <View {...props} style={styles.tabListContainer}>
+    <View {...props} style={[styles.tabListContainer, inLesson && styles.hidden]}>
       <ThemedView type="backgroundElement" style={styles.innerContainer}>
         <ThemedText type="smallBold" style={styles.brandText}>
-          Crypto Literacy
+          🦜 Crypto Literacy
         </ThemedText>
 
         {props.children}
@@ -77,6 +81,9 @@ const styles = StyleSheet.create({
     flexGrow: 1,
     gap: Spacing.two,
     maxWidth: MaxContentWidth,
+  },
+  hidden: {
+    display: 'none',
   },
   brandText: {
     marginRight: 'auto',

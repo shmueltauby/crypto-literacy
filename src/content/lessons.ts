@@ -7,6 +7,7 @@ export type QuizQuestion = {
 
 export type Lesson = {
   id: string;
+  emoji: string;
   title: string;
   summary: string;
   minutes: number;
@@ -17,6 +18,7 @@ export type Lesson = {
 export const lessons: Lesson[] = [
   {
     id: 'what-is-crypto',
+    emoji: '🪙',
     title: 'What is crypto?',
     summary: 'Digital money that no single company or government runs.',
     minutes: 3,
@@ -55,6 +57,7 @@ export const lessons: Lesson[] = [
   },
   {
     id: 'how-blockchains-work',
+    emoji: '⛓️',
     title: 'How a blockchain works',
     summary: 'The shared record book behind every cryptocurrency.',
     minutes: 4,
@@ -107,6 +110,7 @@ export const lessons: Lesson[] = [
   },
   {
     id: 'coins-and-tokens',
+    emoji: '🌐',
     title: 'Bitcoin, Ethereum and everything else',
     summary: 'Why there are thousands of coins and how they differ.',
     minutes: 4,
@@ -145,6 +149,7 @@ export const lessons: Lesson[] = [
   },
   {
     id: 'wallets-and-keys',
+    emoji: '🔑',
     title: 'Wallets, keys and seed phrases',
     summary: 'What it really means to own crypto.',
     minutes: 4,
@@ -189,6 +194,7 @@ export const lessons: Lesson[] = [
   },
   {
     id: 'exchanges-and-custody',
+    emoji: '🏦',
     title: 'Exchanges and who holds your coins',
     summary: 'The difference between an account and a wallet.',
     minutes: 3,
@@ -227,6 +233,7 @@ export const lessons: Lesson[] = [
   },
   {
     id: 'scams-and-safety',
+    emoji: '🛡️',
     title: 'Scams and staying safe',
     summary: 'The tricks that catch most people, and how to spot them.',
     minutes: 4,
