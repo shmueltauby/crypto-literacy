@@ -5,44 +5,88 @@ import { CryptoCan } from '@/components/crypto-can';
 import { Screen } from '@/components/screen';
 import { SpeechBubble } from '@/components/speech-bubble';
 import { ThemedText } from '@/components/themed-text';
-import { Spacing } from '@/constants/theme';
-import { lessons } from '@/content/lessons';
+import { Fonts, Spacing } from '@/constants/theme';
+import { lessons, type Lesson } from '@/content/lessons';
+import { useLessonTint } from '@/hooks/use-lesson-tint';
 import { useProgress } from '@/hooks/use-progress';
 import { useTheme } from '@/hooks/use-theme';
 
-// Sideways shift of each stop on the path, so it winds like a trail.
-const PATH_OFFSETS = [0, 56, 84, 56, 0, -56, -84, -56];
-const NODE_SIZE = 76;
+function openLesson(lesson: Lesson) {
+  router.push({ pathname: '/lesson/[id]', params: { id: lesson.id } });
+}
 
-export default function LearnScreen() {
-  const theme = useTheme();
-  const { completed, xp, streak, name } = useProgress();
-
-  const nextIndex = lessons.findIndex((lesson) => !completed.includes(lesson.id));
-  const allDone = nextIndex === -1;
-  const greeting = allDone
-    ? 'You finished every lesson! Tap any stop to practise again.'
-    : completed.length === 0
-      ? `${name ? `Hi ${name}! ` : ''}Tap the green circle to start your first lesson.`
-      : `${name ? `Nice work, ${name}! ` : 'Nice work! '}Next up: ${lessons[nextIndex].title}`;
-
+function FeaturedLesson({ lesson }: { lesson: Lesson }) {
+  const tint = useLessonTint(lesson.color);
   return (
-    <Screen>
-      <View style={styles.stats}>
-        <View style={[styles.stat, { borderColor: theme.border }]}>
-          <ThemedText type="smallBold" style={styles.statText}>
-            🔥 {streak} day streak
-          </ThemedText>
-        </View>
-        <View style={[styles.stat, { borderColor: theme.border }]}>
-          <ThemedText type="smallBold" style={styles.statText}>
-            ⚡ {xp} XP
+    <Pressable
+      accessibilityRole="button"
+      onPress={() => openLesson(lesson)}
+      style={({ pressed }) => [styles.featured, { backgroundColor: tint.soft }, pressed && styles.pressed]}>
+      <View style={styles.featuredText}>
+        <ThemedText type="smallBold" style={{ color: tint.strong }}>
+          Up next
+        </ThemedText>
+        <ThemedText type="smallBold" style={styles.featuredTitle}>
+          {lesson.title}
+        </ThemedText>
+        <ThemedText type="small">{lesson.summary}</ThemedText>
+        <View style={[styles.startPill, { backgroundColor: tint.strong }]}>
+          <ThemedText type="smallBold" style={styles.startText}>
+            Start · {lesson.minutes} min
           </ThemedText>
         </View>
       </View>
+      <ThemedText style={styles.featuredEmoji}>{lesson.emoji}</ThemedText>
+    </Pressable>
+  );
+}
 
+function LessonTile({ lesson, done }: { lesson: Lesson; done: boolean }) {
+  const theme = useTheme();
+  const tint = useLessonTint(lesson.color);
+  return (
+    <Pressable
+      accessibilityRole="button"
+      accessibilityLabel={`${lesson.title}${done ? ', explored' : ''}`}
+      onPress={() => openLesson(lesson)}
+      style={({ pressed }) => [styles.tile, { backgroundColor: tint.soft }, pressed && styles.pressed]}>
+      <View style={styles.tileTop}>
+        <ThemedText style={styles.tileEmoji}>{lesson.emoji}</ThemedText>
+        {done && (
+          <View style={[styles.doneBadge, { backgroundColor: theme.success }]}>
+            <ThemedText type="smallBold" style={styles.doneText}>
+              ✓
+            </ThemedText>
+          </View>
+        )}
+      </View>
+      <ThemedText type="smallBold" style={styles.tileTitle}>
+        {lesson.title}
+      </ThemedText>
+      <ThemedText type="small" themeColor="textSecondary">
+        {lesson.minutes} min · {lesson.cards.length} cards
+      </ThemedText>
+    </Pressable>
+  );
+}
+
+export default function LearnScreen() {
+  const theme = useTheme();
+  const { completed, name } = useProgress();
+
+  const next = lessons.find((lesson) => !completed.includes(lesson.id));
+  const doneCount = lessons.length - lessons.filter((lesson) => !completed.includes(lesson.id)).length;
+  const hello = name ? `, ${name}` : '';
+  const greeting = !next
+    ? `You’ve explored everything${hello}! Revisit any topic whenever you like.`
+    : doneCount === 0
+      ? `Hi${hello}! Pick any topic and I’ll show you around.`
+      : `Welcome back${hello}! Ready for another one?`;
+
+  return (
+    <Screen>
       <View style={styles.hero}>
-        <CryptoCan size={96} mood={allDone ? 'cheer' : 'happy'} />
+        <CryptoCan size={92} mood={next ? 'happy' : 'cheer'} />
         <SpeechBubble style={styles.heroBubble}>
           <ThemedText type="smallBold" style={styles.heroText}>
             {greeting}
@@ -50,63 +94,29 @@ export default function LearnScreen() {
         </SpeechBubble>
       </View>
 
-      <View style={[styles.unit, { backgroundColor: theme.primary, borderColor: theme.primaryShade }]}>
-        <ThemedText type="smallBold" style={styles.unitLabel}>
-          UNIT 1
-        </ThemedText>
-        <ThemedText type="smallBold" style={styles.unitTitle}>
-          Crypto basics
-        </ThemedText>
-        <ThemedText type="small" style={styles.unitLabel}>
-          {completed.length} of {lessons.length} lessons complete
-        </ThemedText>
-      </View>
+      {next && <FeaturedLesson lesson={next} />}
 
-      <View style={styles.path}>
-        {lessons.map((lesson, index) => {
-          const done = completed.includes(lesson.id);
-          const current = index === nextIndex;
-          const locked = !done && !current;
-          const colors = done
-            ? { face: theme.gold, edge: theme.goldShade }
-            : current
-              ? { face: theme.primary, edge: theme.primaryShade }
-              : { face: theme.backgroundSelected, edge: theme.border };
-
-          return (
+      <View style={styles.sectionHeader}>
+        <ThemedText type="smallBold" style={styles.sectionTitle}>
+          All topics
+        </ThemedText>
+        <View style={styles.dots}>
+          {lessons.map((lesson) => (
             <View
               key={lesson.id}
-              style={[styles.stop, { left: PATH_OFFSETS[index % PATH_OFFSETS.length] }]}>
-              {current && (
-                <View style={[styles.startTag, { backgroundColor: theme.background, borderColor: theme.border }]}>
-                  <ThemedText type="smallBold" style={{ color: theme.primary }}>
-                    START
-                  </ThemedText>
-                </View>
-              )}
-              <Pressable
-                accessibilityRole="button"
-                accessibilityLabel={`${lesson.title}${locked ? ', locked' : ''}`}
-                disabled={locked}
-                onPress={() => router.push({ pathname: '/lesson/[id]', params: { id: lesson.id } })}
-                style={({ pressed }) => [
-                  styles.node,
-                  { backgroundColor: colors.face, borderColor: colors.edge },
-                  pressed && styles.nodePressed,
-                ]}>
-                <ThemedText style={[styles.nodeEmoji, locked && styles.locked]}>
-                  {locked ? '🔒' : lesson.emoji}
-                </ThemedText>
-              </Pressable>
-              <ThemedText
-                type="smallBold"
-                themeColor={locked ? 'textSecondary' : 'text'}
-                style={styles.stopTitle}>
-                {lesson.title}
-              </ThemedText>
-            </View>
-          );
-        })}
+              style={[
+                styles.dot,
+                { backgroundColor: completed.includes(lesson.id) ? theme.success : theme.backgroundSelected },
+              ]}
+            />
+          ))}
+        </View>
+      </View>
+
+      <View style={styles.grid}>
+        {lessons.map((lesson) => (
+          <LessonTile key={lesson.id} lesson={lesson} done={completed.includes(lesson.id)} />
+        ))}
       </View>
 
       <ThemedText type="small" themeColor="textSecondary" style={styles.disclaimer}>
@@ -117,19 +127,6 @@ export default function LearnScreen() {
 }
 
 const styles = StyleSheet.create({
-  stats: {
-    flexDirection: 'row',
-    gap: Spacing.two,
-  },
-  stat: {
-    borderWidth: 2,
-    borderRadius: Spacing.three,
-    paddingVertical: Spacing.one,
-    paddingHorizontal: Spacing.three,
-  },
-  statText: {
-    fontSize: 15,
-  },
   hero: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -142,61 +139,98 @@ const styles = StyleSheet.create({
     fontSize: 16,
     lineHeight: 22,
   },
-  unit: {
-    borderRadius: Spacing.three,
-    borderBottomWidth: 4,
-    paddingVertical: Spacing.three,
-    paddingHorizontal: Spacing.four,
+  featured: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.three,
+    borderRadius: 28,
+    padding: Spacing.four,
   },
-  unitLabel: {
-    color: '#ffffff',
-    opacity: 0.9,
+  featuredText: {
+    flex: 1,
+    alignItems: 'flex-start',
+    gap: Spacing.one,
   },
-  unitTitle: {
-    color: '#ffffff',
-    fontSize: 22,
+  featuredTitle: {
+    fontSize: 24,
     lineHeight: 30,
   },
-  path: {
+  featuredEmoji: {
+    fontFamily: Fonts.sans,
+    fontSize: 64,
+    lineHeight: 80,
+  },
+  startPill: {
+    marginTop: Spacing.two,
+    borderRadius: 999,
+    paddingVertical: Spacing.two,
+    paddingHorizontal: Spacing.three,
+  },
+  startText: {
+    color: '#ffffff',
+    fontSize: 15,
+  },
+  sectionHeader: {
+    flexDirection: 'row',
     alignItems: 'center',
-    gap: Spacing.four,
-    paddingVertical: Spacing.three,
+    justifyContent: 'space-between',
+    marginTop: Spacing.two,
   },
-  stop: {
-    alignItems: 'center',
-    gap: Spacing.two,
-    width: 180,
+  sectionTitle: {
+    fontSize: 20,
+    lineHeight: 26,
   },
-  startTag: {
-    borderWidth: 2,
-    borderRadius: Spacing.two,
-    paddingVertical: Spacing.half,
-    paddingHorizontal: Spacing.two,
+  dots: {
+    flexDirection: 'row',
+    gap: Spacing.one + Spacing.half,
   },
-  node: {
-    width: NODE_SIZE,
-    height: NODE_SIZE,
-    borderRadius: NODE_SIZE / 2,
-    borderBottomWidth: 7,
+  dot: {
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+  },
+  grid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+    rowGap: Spacing.two + Spacing.one,
+  },
+  tile: {
+    width: '48.2%',
+    borderRadius: 24,
+    padding: Spacing.three,
+    gap: Spacing.one,
+  },
+  tileTop: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    justifyContent: 'space-between',
+  },
+  tileEmoji: {
+    fontFamily: Fonts.sans,
+    fontSize: 38,
+    lineHeight: 48,
+  },
+  tileTitle: {
+    fontSize: 16,
+    lineHeight: 21,
+  },
+  doneBadge: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  nodePressed: {
-    borderBottomWidth: 2,
-    height: NODE_SIZE - 5,
-    marginTop: 5,
+  doneText: {
+    color: '#ffffff',
   },
-  nodeEmoji: {
-    fontSize: 30,
-    lineHeight: 38,
-  },
-  locked: {
-    opacity: 0.5,
-  },
-  stopTitle: {
-    textAlign: 'center',
+  pressed: {
+    opacity: 0.8,
+    transform: [{ scale: 0.98 }],
   },
   disclaimer: {
     textAlign: 'center',
+    marginTop: Spacing.two,
   },
 });

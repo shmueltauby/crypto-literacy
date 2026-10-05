@@ -1,282 +1,372 @@
-export type QuizQuestion = {
-  question: string;
-  options: string[];
-  answerIndex: number;
-  explanation: string;
-};
+export type LessonColor = 'amber' | 'blue' | 'purple' | 'green' | 'teal' | 'red';
+
+type CompareSide = { emoji: string; title: string; points: string[] };
+
+export type Visual =
+  /** A row of large emoji that tells a tiny story. */
+  | { kind: 'scene'; emojis: string[]; caption?: string }
+  | { kind: 'compare'; left: CompareSide; right: CompareSide }
+  | { kind: 'flow'; steps: { emoji: string; label: string }[] }
+  | { kind: 'stat'; value: string; label: string }
+  /** One bank in the middle versus many connected computers. */
+  | { kind: 'network' }
+  /** A row of linked blocks the reader can tamper with. */
+  | { kind: 'chain' }
+  /** An example 12-word seed phrase. */
+  | { kind: 'seed' }
+  /** Cards that show a verdict when tapped. */
+  | { kind: 'reveal'; items: { emoji: string; label: string; verdict: string; good: boolean }[] }
+  /** A "what would you do?" moment. Nothing is scored. */
+  | { kind: 'choice'; options: { label: string; reply: string; good: boolean }[] }
+  | { kind: 'takeaways'; items: { emoji: string; text: string }[] };
+
+export type Card = { title: string; text?: string; visual: Visual };
 
 export type Lesson = {
   id: string;
   emoji: string;
+  color: LessonColor;
   title: string;
   summary: string;
   minutes: number;
-  sections: { heading: string; body: string }[];
-  quiz: QuizQuestion[];
+  cards: Card[];
 };
 
 export const lessons: Lesson[] = [
   {
     id: 'what-is-crypto',
     emoji: '🪙',
+    color: 'amber',
     title: 'What is crypto?',
-    summary: 'Digital money that no single company or government runs.',
-    minutes: 3,
-    sections: [
+    summary: 'Money with no bank in the middle.',
+    minutes: 2,
+    cards: [
       {
-        heading: 'Money you already use is mostly digital',
-        body: 'When you pay by card, no coins move. Your bank lowers the number in your account and the shop’s bank raises theirs. The banks keep the records, and everyone trusts them to keep those records honestly.',
+        title: 'Pay by card and no coins move',
+        text: 'Your bank just changes two numbers. Everyone trusts the bank to keep score.',
+        visual: { kind: 'scene', emojis: ['💳', '➡️', '🏦', '➡️', '🏪'] },
       },
       {
-        heading: 'Crypto removes the middleman',
-        body: 'A cryptocurrency is digital money whose records are kept by thousands of computers around the world instead of by one bank. They all hold the same copy of the record book and check each other’s work, so no single party can quietly change it.',
+        title: 'Crypto has no scorekeeper',
+        text: 'Thousands of computers hold the same record and check each other.',
+        visual: { kind: 'network' },
       },
       {
-        heading: 'What that changes for you',
-        body: 'You can send value to anyone with an internet connection, at any hour, without asking permission. The trade-off is responsibility: there is usually no helpline that can reverse a mistake or recover a lost password.',
-      },
-    ],
-    quiz: [
-      {
-        question: 'Who keeps the records for a cryptocurrency like Bitcoin?',
-        options: ['One central bank', 'A network of many computers', 'The company that invented it'],
-        answerIndex: 1,
-        explanation: 'Thousands of independent computers hold the same record book and verify each other.',
+        title: 'Same idea, different rules',
+        visual: {
+          kind: 'compare',
+          left: { emoji: '🏦', title: 'Bank', points: ['Has opening hours', 'Can undo mistakes', 'Needs to approve you'] },
+          right: { emoji: '🌐', title: 'Crypto', points: ['Never closes', 'Payments are final', 'Open to anyone'] },
+        },
       },
       {
-        question: 'What is the main trade-off of using crypto directly?',
-        options: [
-          'It only works during business hours',
-          'You need permission from a bank',
-          'Mistakes are usually not reversible',
-        ],
-        answerIndex: 2,
-        explanation: 'With no middleman, there is usually nobody who can undo a payment or reset your access.',
+        title: 'You sent crypto to the wrong person. Who can undo it?',
+        visual: {
+          kind: 'choice',
+          options: [
+            { label: 'The crypto helpline', reply: 'There isn’t one. No company runs the network.', good: false },
+            { label: 'My bank', reply: 'Banks don’t control the blockchain, so they can’t reverse it.', good: false },
+            { label: 'Nobody', reply: 'Exactly. That freedom comes with responsibility.', good: true },
+          ],
+        },
+      },
+      {
+        title: 'In a nutshell',
+        visual: {
+          kind: 'takeaways',
+          items: [
+            { emoji: '🌐', text: 'No single company or government runs it' },
+            { emoji: '⏰', text: 'It works any time, anywhere' },
+            { emoji: '⚠️', text: 'Mistakes usually can’t be undone' },
+          ],
+        },
       },
     ],
   },
   {
     id: 'how-blockchains-work',
     emoji: '⛓️',
+    color: 'blue',
     title: 'How a blockchain works',
-    summary: 'The shared record book behind every cryptocurrency.',
-    minutes: 4,
-    sections: [
+    summary: 'The shared notebook nobody can secretly edit.',
+    minutes: 2,
+    cards: [
       {
-        heading: 'A record book in pages',
-        body: 'A blockchain is a list of transactions grouped into pages called blocks. Every new block includes a fingerprint of the block before it, which links them into a chain.',
+        title: 'A notebook everyone shares',
+        text: 'Payments are written on pages called blocks. Everyone holds the same copy.',
+        visual: { kind: 'scene', emojis: ['📒', '📒', '📒'], caption: 'Same notebook, thousands of copies' },
       },
       {
-        heading: 'Why it is hard to cheat',
-        body: 'If someone changes an old transaction, that block’s fingerprint changes and no longer matches the next block. Every other computer on the network would see the mismatch and reject the altered copy.',
+        title: 'Try to cheat',
+        text: 'Each block carries a fingerprint of the one before it. Tap a block to change it.',
+        visual: { kind: 'chain' },
       },
       {
-        heading: 'Who adds new blocks',
-        body: 'Networks need a rule for who gets to add the next block. Bitcoin uses proof of work, where computers called miners compete using electricity. Ethereum uses proof of stake, where validators lock up coins as a deposit they lose if they cheat.',
+        title: 'Who adds the next block?',
+        visual: {
+          kind: 'compare',
+          left: { emoji: '⛏️', title: 'Proof of work', points: ['Used by Bitcoin', 'Computers compete', 'Costs electricity'] },
+          right: { emoji: '🔒', title: 'Proof of stake', points: ['Used by Ethereum', 'Lock coins as a deposit', 'Cheat and you lose it'] },
+        },
       },
       {
-        heading: 'Public by default',
-        body: 'Most blockchains are open for anyone to read. Your name is not attached, but every transaction of an address is visible forever. Crypto is pseudonymous, not anonymous.',
-      },
-    ],
-    quiz: [
-      {
-        question: 'What links one block to the next?',
-        options: [
-          'Each block contains a fingerprint of the previous block',
-          'A bank signs every block',
-          'Blocks are stored in the same folder',
-        ],
-        answerIndex: 0,
-        explanation: 'That fingerprint (a hash) is why changing old data breaks the chain.',
+        title: 'It’s all on show',
+        text: 'Tap to see what anyone can look up.',
+        visual: {
+          kind: 'reveal',
+          items: [
+            { emoji: '📬', label: 'Your address', verdict: 'Public. Anyone can see it.', good: false },
+            { emoji: '💸', label: 'Every payment you make', verdict: 'Public, and it stays there forever.', good: false },
+            { emoji: '🪪', label: 'Your name', verdict: 'Hidden, unless someone links it to your address.', good: true },
+          ],
+        },
       },
       {
-        question: 'Are transactions on most blockchains private?',
-        options: [
-          'Yes, nobody can see them',
-          'No, anyone can see them, though names are not attached',
-          'Only the government can see them',
-        ],
-        answerIndex: 1,
-        explanation: 'Addresses are public and permanent. If an address is linked to you, your history is visible.',
-      },
-      {
-        question: 'What do proof-of-stake validators risk if they cheat?',
-        options: ['Their electricity bill', 'Nothing', 'The coins they locked up as a deposit'],
-        answerIndex: 2,
-        explanation: 'Staked coins act as a security deposit that can be taken away for dishonest behaviour.',
+        title: 'In a nutshell',
+        visual: {
+          kind: 'takeaways',
+          items: [
+            { emoji: '🔗', text: 'Blocks are chained by fingerprints' },
+            { emoji: '🚫', text: 'Change the past and the chain breaks' },
+            { emoji: '👀', text: 'Private-ish, never anonymous' },
+          ],
+        },
       },
     ],
   },
   {
     id: 'coins-and-tokens',
     emoji: '🌐',
-    title: 'Bitcoin, Ethereum and everything else',
-    summary: 'Why there are thousands of coins and how they differ.',
-    minutes: 4,
-    sections: [
+    color: 'purple',
+    title: 'Bitcoin, Ethereum and the rest',
+    summary: 'Why there are thousands of coins.',
+    minutes: 2,
+    cards: [
       {
-        heading: 'Bitcoin',
-        body: 'Bitcoin launched in 2009 and does one job: move and store value. Its supply is capped at 21 million coins, which is why people compare it to digital gold.',
+        title: 'Bitcoin: digital gold',
+        text: 'Launched in 2009. It does one job: store and move value.',
+        visual: { kind: 'stat', value: '21 million', label: 'bitcoins will ever exist' },
       },
       {
-        heading: 'Ethereum',
-        body: 'Ethereum is a blockchain that can also run programs, called smart contracts. These programs let people build apps for lending, trading, games and more without a company in the middle. Its coin is called ether (ETH).',
+        title: 'Ethereum: a blockchain that runs apps',
+        text: 'Lending, trading and games, with no company in the middle.',
+        visual: {
+          kind: 'flow',
+          steps: [
+            { emoji: '📝', label: 'Someone writes a smart contract' },
+            { emoji: '⚙️', label: 'It runs by itself, exactly as written' },
+            { emoji: '🤝', label: 'Strangers can deal without a middleman' },
+          ],
+        },
       },
       {
-        heading: 'Stablecoins',
-        body: 'A stablecoin is a token designed to stay worth one unit of a regular currency, usually one US dollar. Most are backed by reserves held by a company, so they depend on that company actually holding what it claims.',
+        title: 'Stablecoins: built to stay at $1',
+        text: 'Most are backed by a company’s reserves, so you are trusting that company.',
+        visual: { kind: 'scene', emojis: ['🪙', '🟰', '💵'] },
       },
       {
-        heading: 'Everything else',
-        body: 'Anyone can create a token in minutes, so thousands exist. Some power real products. Many have no purpose beyond speculation, and some are created only to take buyers’ money. A token existing, or its price rising, says nothing about whether it is trustworthy.',
+        title: 'Does this prove a token is trustworthy?',
+        text: 'Anyone can make a token in minutes. Tap each sign.',
+        visual: {
+          kind: 'reveal',
+          items: [
+            { emoji: '📈', label: 'The price is shooting up', verdict: 'No. Hype moves prices too.', good: false },
+            { emoji: '⭐', label: 'A celebrity promotes it', verdict: 'No. They are often paid to.', good: false },
+            { emoji: '👥', label: 'Everyone is talking about it', verdict: 'No. Popular is not the same as safe.', good: false },
+          ],
+        },
       },
-    ],
-    quiz: [
       {
-        question: 'What can Ethereum do that Bitcoin was not designed for?',
-        options: ['Run programs called smart contracts', 'Work without the internet', 'Guarantee a stable price'],
-        answerIndex: 0,
-        explanation: 'Smart contracts are programs stored on the blockchain that run exactly as written.',
-      },
-      {
-        question: 'What is a stablecoin meant to do?',
-        options: ['Double in value each year', 'Hold a steady value, usually one US dollar', 'Replace Bitcoin'],
-        answerIndex: 1,
-        explanation: 'Stablecoins aim to track a regular currency, but they rely on whoever backs them.',
+        title: 'In a nutshell',
+        visual: {
+          kind: 'takeaways',
+          items: [
+            { emoji: '🥇', text: 'Bitcoin is scarce digital money' },
+            { emoji: '⚙️', text: 'Ethereum runs programs' },
+            { emoji: '🤔', text: 'Most other tokens deserve suspicion' },
+          ],
+        },
       },
     ],
   },
   {
     id: 'wallets-and-keys',
     emoji: '🔑',
+    color: 'green',
     title: 'Wallets, keys and seed phrases',
     summary: 'What it really means to own crypto.',
-    minutes: 4,
-    sections: [
+    minutes: 2,
+    cards: [
       {
-        heading: 'A wallet holds keys, not coins',
-        body: 'Your coins live on the blockchain. A wallet stores the private key that proves they are yours and lets you send them. Whoever has the private key controls the coins.',
+        title: 'A wallet holds keys, not coins',
+        text: 'Your coins live on the blockchain. The key proves they are yours.',
+        visual: { kind: 'scene', emojis: ['👛', '🔑'], caption: 'Whoever has the key controls the coins' },
       },
       {
-        heading: 'Address and private key',
-        body: 'Your address is like an account number: safe to share so people can pay you. Your private key is like the PIN and signature combined: never share it with anyone, for any reason.',
+        title: 'Safe to share?',
+        text: 'Tap each one to find out.',
+        visual: {
+          kind: 'reveal',
+          items: [
+            { emoji: '📬', label: 'Your address', verdict: 'Yes. It works like an account number.', good: true },
+            { emoji: '🔑', label: 'Your private key', verdict: 'Never. It controls your coins.', good: false },
+            { emoji: '📝', label: 'Your seed phrase', verdict: 'Never. It is the backup of every key.', good: false },
+          ],
+        },
       },
       {
-        heading: 'The seed phrase',
-        body: 'When you create a wallet you get a seed phrase, usually 12 or 24 ordinary words. It is a backup of all your keys. Anyone who sees it can take everything, and if you lose it along with your device, nobody can recover your coins.',
+        title: '12 words that are everything',
+        text: 'Anyone who sees them can take it all. Lose them and nobody can help.',
+        visual: { kind: 'seed' },
       },
       {
-        heading: 'Keeping it safe',
-        body: 'Write the seed phrase on paper and store it somewhere private. Do not photograph it, email it, or save it in a notes app or cloud drive. No genuine company or support agent will ever ask for it.',
-      },
-    ],
-    quiz: [
-      {
-        question: 'Which of these is safe to share with someone who wants to pay you?',
-        options: ['Your seed phrase', 'Your private key', 'Your address'],
-        answerIndex: 2,
-        explanation: 'An address only lets people send you funds. The key and seed phrase give full control.',
+        title: 'Where should those words live?',
+        visual: {
+          kind: 'compare',
+          left: { emoji: '✅', title: 'Good', points: ['Written on paper', 'Hidden somewhere private'] },
+          right: { emoji: '❌', title: 'Risky', points: ['A photo on your phone', 'Email or notes app', 'Cloud storage'] },
+        },
       },
       {
-        question: 'A support agent asks for your seed phrase to fix a problem. What is happening?',
-        options: ['It is a scam', 'It is a normal security check', 'It is required once a year'],
-        answerIndex: 0,
-        explanation: 'Nobody legitimate ever needs your seed phrase. Anyone asking for it is trying to steal from you.',
+        title: '“Support” asks for your seed phrase to fix a bug. You…',
+        visual: {
+          kind: 'choice',
+          options: [
+            { label: 'Send it so they can help', reply: 'They would empty your wallet in seconds.', good: false },
+            { label: 'Ask them to prove who they are', reply: 'Scammers fake proof easily. The request itself is the giveaway.', good: false },
+            { label: 'Block them', reply: 'Right. Nobody genuine ever needs your seed phrase.', good: true },
+          ],
+        },
       },
       {
-        question: 'Where is the best place to keep a seed phrase?',
-        options: ['A photo on your phone', 'Written on paper, stored privately', 'In an email to yourself'],
-        answerIndex: 1,
-        explanation: 'Offline storage keeps it away from hackers and malware.',
+        title: 'In a nutshell',
+        visual: {
+          kind: 'takeaways',
+          items: [
+            { emoji: '📬', text: 'Share your address freely' },
+            { emoji: '🤐', text: 'Never share a key or seed phrase' },
+            { emoji: '📄', text: 'Keep the seed phrase on paper, offline' },
+          ],
+        },
       },
     ],
   },
   {
     id: 'exchanges-and-custody',
     emoji: '🏦',
+    color: 'teal',
     title: 'Exchanges and who holds your coins',
-    summary: 'The difference between an account and a wallet.',
-    minutes: 3,
-    sections: [
+    summary: 'An account is not the same as a wallet.',
+    minutes: 2,
+    cards: [
       {
-        heading: 'What an exchange does',
-        body: 'An exchange is a company where you swap regular money for crypto. It works like an online brokerage: you log in with an email and password and see a balance.',
+        title: 'An exchange swaps money for crypto',
+        text: 'You log in with an email and password, like an online broker.',
+        visual: {
+          kind: 'flow',
+          steps: [
+            { emoji: '💵', label: 'You send regular money' },
+            { emoji: '🏢', label: 'The exchange finds a seller' },
+            { emoji: '🪙', label: 'Crypto shows in your account' },
+          ],
+        },
       },
       {
-        heading: 'Custodial: they hold the keys',
-        body: 'On an exchange, the company holds the private keys and owes you the coins. This is convenient and you can reset a forgotten password, but if the company is hacked, freezes withdrawals or fails, your coins can be stuck or lost.',
+        title: 'So who holds the keys?',
+        visual: {
+          kind: 'compare',
+          left: { emoji: '🏢', title: 'The exchange', points: ['Password can be reset', 'Can be hacked or frozen', 'They owe you the coins'] },
+          right: { emoji: '👛', title: 'You', points: ['Nobody can freeze it', 'No reset button', 'Safety is on you'] },
+        },
       },
       {
-        heading: 'Self-custody: you hold the keys',
-        body: 'With your own wallet, only you can move the coins. No company can freeze or lose them, but the safety of the seed phrase is entirely on you.',
+        title: 'Every transaction pays a fee',
+        text: 'The fee goes to the network, and it climbs when things get busy.',
+        visual: { kind: 'scene', emojis: ['🚗', '🚕', '🚙', '⛽'], caption: 'More traffic, higher fee' },
       },
       {
-        heading: 'Fees and sending',
-        body: 'Every blockchain transaction pays a network fee, which rises when the network is busy. Before sending, check the address and the network carefully. Coins sent to the wrong address or on the wrong network are usually gone for good.',
+        title: 'You are about to hit send. What do you double-check?',
+        visual: {
+          kind: 'choice',
+          options: [
+            { label: 'Just the amount', reply: 'The amount matters, but a wrong address loses everything.', good: false },
+            { label: 'Nothing, I can cancel later', reply: 'There is no cancel. Sent means sent.', good: false },
+            { label: 'The address and the network', reply: 'Yes. Get either one wrong and the coins are usually gone.', good: true },
+          ],
+        },
       },
-    ],
-    quiz: [
       {
-        question: 'Who holds the private keys for coins kept on an exchange?',
-        options: ['You do', 'The exchange does', 'Nobody does'],
-        answerIndex: 1,
-        explanation: 'The exchange controls the keys and owes you the balance, much like a bank.',
-      },
-      {
-        question: 'What should you always check before sending crypto?',
-        options: ['The address and the network', 'The weather', 'Nothing, it can be reversed later'],
-        answerIndex: 0,
-        explanation: 'Transactions are final. A wrong address or network usually means the coins are lost.',
+        title: 'In a nutshell',
+        visual: {
+          kind: 'takeaways',
+          items: [
+            { emoji: '🏢', text: 'On an exchange, they hold the keys' },
+            { emoji: '👛', text: 'In your own wallet, you do' },
+            { emoji: '🔍', text: 'Check address and network before sending' },
+          ],
+        },
       },
     ],
   },
   {
     id: 'scams-and-safety',
     emoji: '🛡️',
+    color: 'red',
     title: 'Scams and staying safe',
-    summary: 'The tricks that catch most people, and how to spot them.',
-    minutes: 4,
-    sections: [
+    summary: 'The tricks that catch most people.',
+    minutes: 2,
+    cards: [
       {
-        heading: 'Guaranteed returns',
-        body: 'Nobody can promise a fixed profit from crypto. Offers such as “2% a day” or “double your coins” are paid, if at all, with money from newer victims until the scheme collapses.',
+        title: 'Guaranteed profit means scam',
+        text: 'Nobody can promise returns. Early payouts come from newer victims.',
+        visual: { kind: 'stat', value: '“2% a day”', label: 'is a promise only scammers make' },
       },
       {
-        heading: 'Fake support and fake websites',
-        body: 'Scammers copy real websites and pose as support staff on social media. They ask for your seed phrase or tell you to “verify” your wallet. Type web addresses yourself, and never follow links from messages.',
+        title: 'Spot the red flag',
+        text: 'Tap each message to see the trick behind it.',
+        visual: {
+          kind: 'reveal',
+          items: [
+            { emoji: '⏰', label: '“Act now or miss out!”', verdict: 'Urgency stops you thinking.', good: false },
+            { emoji: '🤫', label: '“Keep this between us”', verdict: 'Secrecy stops you asking for advice.', good: false },
+            { emoji: '🎁', label: '“Send 1 coin, get 2 back”', verdict: 'Giveaways like this are always fake.', good: false },
+          ],
+        },
       },
       {
-        heading: 'Romance and friendship scams',
-        body: 'Someone you meet online builds trust over weeks, then introduces a trading platform that shows large fake profits. When you try to withdraw, there are endless fees and the money is gone.',
+        title: 'The long con',
+        text: 'It can take weeks, which is why it works.',
+        visual: {
+          kind: 'flow',
+          steps: [
+            { emoji: '💬', label: 'A friendly stranger messages you' },
+            { emoji: '📈', label: 'They show you an “amazing” trading app' },
+            { emoji: '🤑', label: 'It displays huge fake profits' },
+            { emoji: '🚫', label: 'You can never withdraw' },
+          ],
+        },
       },
       {
-        heading: 'Simple rules that block most scams',
-        body: 'Never share a seed phrase. Be suspicious of urgency and secrecy. Do not send crypto to someone who promises to send more back. If you did not go looking for an offer and it found you, treat it as a scam until proven otherwise.',
-      },
-    ],
-    quiz: [
-      {
-        question: 'An account promises to send back double any crypto you send. What should you do?',
-        options: ['Send a small amount to test it', 'Ignore it, it is a scam', 'Send quickly before the offer ends'],
-        answerIndex: 1,
-        explanation: 'Giveaway doubling offers are always scams, including the ones that seem to pay small test amounts.',
-      },
-      {
-        question: 'Which is a warning sign of a scam?',
-        options: [
-          'Pressure to act fast and keep it secret',
-          'A website you typed in yourself',
-          'A fee shown before you confirm a transaction',
-        ],
-        answerIndex: 0,
-        explanation: 'Urgency and secrecy are designed to stop you thinking or asking someone you trust.',
+        title: 'A site says you made $5,000, but wants $200 to withdraw. You…',
+        visual: {
+          kind: 'choice',
+          options: [
+            { label: 'Pay the fee', reply: 'Then comes another fee, and another. The $5,000 never existed.', good: false },
+            { label: 'Message their support', reply: 'Support is the scammer too.', good: false },
+            { label: 'Walk away', reply: 'Right. The profit is invented and the fee is the real target.', good: true },
+          ],
+        },
       },
       {
-        question: 'A platform shows big profits but asks for a fee before you can withdraw. What is most likely true?',
-        options: ['The profits are real', 'It is a tax requirement', 'The profits are fake and the fee will be stolen too'],
-        answerIndex: 2,
-        explanation: 'Fake platforms display invented balances and keep inventing fees until you stop paying.',
+        title: 'In a nutshell',
+        visual: {
+          kind: 'takeaways',
+          items: [
+            { emoji: '🙅', text: 'No guaranteed returns, ever' },
+            { emoji: '🐢', text: 'Slow down when someone rushes you' },
+            { emoji: '📭', text: 'If the offer found you, assume it is a scam' },
+          ],
+        },
       },
     ],
   },

@@ -9,44 +9,58 @@ import { Platform } from 'react-native';
 
 export const Colors = {
   light: {
-    text: '#2B3238',
+    text: '#22262E',
     background: '#ffffff',
-    backgroundElement: '#F2F4F7',
-    backgroundSelected: '#E3E7EC',
-    textSecondary: '#6B7480',
-    border: '#E3E7EC',
-    primary: '#32B950',
-    primaryShade: '#24903C',
-    accent: '#1CA4F0',
-    accentShade: '#1483C4',
-    accentSoft: '#DDF2FF',
-    gold: '#FFC83D',
-    goldShade: '#E0A500',
+    backgroundElement: '#F3F4F7',
+    backgroundSelected: '#E4E6EC',
+    textSecondary: '#666E7C',
+    border: '#E4E6EC',
+    primary: '#4F46E5',
     success: '#1F9D55',
     successSoft: '#DDF7E3',
-    danger: '#E5484D',
-    dangerShade: '#B93338',
-    dangerSoft: '#FFE3E3',
+    danger: '#DC4A47',
+    dangerSoft: '#FFE3E1',
   },
   dark: {
-    text: '#F1F5F8',
-    background: '#12181C',
-    backgroundElement: '#1E262C',
-    backgroundSelected: '#2B363D',
-    textSecondary: '#A3AEB8',
-    border: '#34414A',
-    primary: '#3CCB5C',
-    primaryShade: '#2A9D45',
-    accent: '#3DB4F5',
-    accentShade: '#1E8FD0',
-    accentSoft: '#15303F',
-    gold: '#FFC83D',
-    goldShade: '#E0A500',
+    text: '#F2F4F8',
+    background: '#13151B',
+    backgroundElement: '#1F222B',
+    backgroundSelected: '#2D313D',
+    textSecondary: '#A5ACBA',
+    border: '#353A47',
+    primary: '#6D66F2',
     success: '#4CD27A',
     successSoft: '#173524',
     danger: '#F0625F',
-    dangerShade: '#B93338',
     dangerSoft: '#3D1F1F',
+  },
+} as const;
+
+/** Each topic has its own colour: a soft background and a strong accent. */
+export const LessonColors = {
+  amber: {
+    light: { soft: '#FFF0D1', strong: '#C98600' },
+    dark: { soft: '#3A2D10', strong: '#F2B632' },
+  },
+  blue: {
+    light: { soft: '#DCEBFF', strong: '#2A72D8' },
+    dark: { soft: '#14273F', strong: '#5BA0F5' },
+  },
+  purple: {
+    light: { soft: '#EAE3FF', strong: '#7250DB' },
+    dark: { soft: '#251D45', strong: '#A48BF7' },
+  },
+  green: {
+    light: { soft: '#DBF4E2', strong: '#1F9650' },
+    dark: { soft: '#14311F', strong: '#4CCB7C' },
+  },
+  teal: {
+    light: { soft: '#D6F2F0', strong: '#0F8F86' },
+    dark: { soft: '#103230', strong: '#3CC7BC' },
+  },
+  red: {
+    light: { soft: '#FFE1DE', strong: '#D34A44' },
+    dark: { soft: '#3D1C1B', strong: '#F47B75' },
   },
 } as const;
 

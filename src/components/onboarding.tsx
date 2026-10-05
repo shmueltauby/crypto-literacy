@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { KeyboardAvoidingView, Platform, StyleSheet, TextInput, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { ChunkyButton } from '@/components/chunky-button';
+import { Button } from '@/components/button';
 import { CryptoCan, type Mood } from '@/components/crypto-can';
 import { SpeechBubble } from '@/components/speech-bubble';
 import { ThemedText } from '@/components/themed-text';
@@ -14,9 +14,9 @@ import { useTheme } from '@/hooks/use-theme';
 const STEP_COUNT = 4;
 
 const perks = [
-  { emoji: '📚', title: 'Bite-size lessons', text: 'Each one takes about three minutes.' },
-  { emoji: '⚡', title: 'Earn XP', text: 'Answer quick questions to lock in what you learn.' },
-  { emoji: '🔥', title: 'Build a streak', text: 'Come back each day to keep it going.' },
+  { emoji: '🖼️', title: 'Pictures, not jargon', text: 'Every idea comes with a visual.' },
+  { emoji: '👆', title: 'Tap and try', text: 'Poke at things to see how they work.' },
+  { emoji: '⏱️', title: 'Two minutes a topic', text: 'Short enough for a coffee break.' },
 ];
 
 export function Onboarding() {
@@ -67,7 +67,7 @@ export function Onboarding() {
 
           {step === 0 && (
             <ThemedText themeColor="textSecondary" style={styles.center}>
-              I&apos;ll help you understand crypto, one tiny lesson at a time. No jargon, no sign-up
+              I&apos;ll help you understand crypto, one picture at a time. No jargon, no sign-up
               and no real money.
             </ThemedText>
           )}
@@ -93,7 +93,7 @@ export function Onboarding() {
           {step === 2 && (
             <View style={styles.perks}>
               {perks.map((perk) => (
-                <View key={perk.title} style={[styles.perk, { borderColor: theme.border }]}>
+                <View key={perk.title} style={[styles.perk, { backgroundColor: theme.backgroundElement }]}>
                   <ThemedText style={styles.perkEmoji}>{perk.emoji}</ThemedText>
                   <View style={styles.perkText}>
                     <ThemedText type="smallBold" style={styles.perkTitle}>
@@ -110,16 +110,16 @@ export function Onboarding() {
 
           {step === 3 && (
             <ThemedText themeColor="textSecondary" style={styles.center}>
-              Your first lesson is waiting. Let&apos;s find out what crypto actually is.
+              Pick any topic to begin. There are no tests and no wrong turns.
             </ThemedText>
           )}
         </View>
 
-        {step === 0 && <ChunkyButton label="Get started" onPress={next} />}
-        {step === 1 && <ChunkyButton label={firstName ? 'Continue' : 'Skip'} onPress={next} />}
-        {step === 2 && <ChunkyButton label="Got it" onPress={next} />}
+        {step === 0 && <Button label="Get started" onPress={next} />}
+        {step === 1 && <Button label={firstName ? 'Continue' : 'Skip'} onPress={next} />}
+        {step === 2 && <Button label="Got it" onPress={next} />}
         {step === 3 && (
-          <ChunkyButton label="Start learning" onPress={() => finishOnboarding(firstName)} />
+          <Button label="Start exploring" onPress={() => finishOnboarding(firstName)} />
         )}
       </KeyboardAvoidingView>
     </ThemedView>
@@ -183,8 +183,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: Spacing.three,
-    borderWidth: 2,
-    borderRadius: Spacing.three,
+    borderRadius: Spacing.four - Spacing.one,
     padding: Spacing.three,
   },
   perkEmoji: {

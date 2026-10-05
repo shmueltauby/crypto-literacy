@@ -5,10 +5,6 @@ const STORAGE_KEY = 'progress-v1';
 
 type Saved = {
   completed: string[];
-  xp: number;
-  streak: number;
-  /** Local date (YYYY-MM-DD) a lesson was last completed. */
-  lastActive: string | null;
   name: string;
   onboarded: boolean;
 };
@@ -16,26 +12,11 @@ type Saved = {
 type Progress = Saved & {
   /** False until saved progress has been read from the device. */
   loaded: boolean;
-  completeLesson: (lessonId: string, xpEarned: number) => void;
+  completeLesson: (lessonId: string) => void;
   finishOnboarding: (name: string) => void;
 };
 
-const empty: Saved = {
-  completed: [],
-  xp: 0,
-  streak: 0,
-  lastActive: null,
-  name: '',
-  onboarded: false,
-};
-
-function dayKey(daysAgo = 0) {
-  const date = new Date();
-  date.setDate(date.getDate() - daysAgo);
-  const month = String(date.getMonth() + 1).padStart(2, '0');
-  const day = String(date.getDate()).padStart(2, '0');
-  return `${date.getFullYear()}-${month}-${day}`;
-}
+const empty: Saved = { completed: [], name: '', onboarded: false };
 
 const ProgressContext = createContext<Progress>({
   ...empty,
@@ -52,10 +33,8 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
     AsyncStorage.getItem(STORAGE_KEY)
       .then((stored) => {
         if (stored) {
-          const parsed: Saved = { ...empty, ...JSON.parse(stored) };
-          // A streak only survives if the last lesson was today or yesterday.
-          const alive = parsed.lastActive === dayKey() || parsed.lastActive === dayKey(1);
-          setSaved(alive ? parsed : { ...parsed, streak: 0 });
+          const { completed, name, onboarded } = { ...empty, ...JSON.parse(stored) };
+          setSaved({ completed, name, onboarded });
         }
       })
       .catch(() => {})
@@ -67,17 +46,9 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
     AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(next)).catch(() => {});
   };
 
-  const completeLesson = (lessonId: string, xpEarned: number) => {
-    const today = dayKey();
-    save({
-      ...saved,
-      completed: saved.completed.includes(lessonId)
-        ? saved.completed
-        : [...saved.completed, lessonId],
-      xp: saved.xp + xpEarned,
-      streak: saved.lastActive === today ? Math.max(saved.streak, 1) : saved.streak + 1,
-      lastActive: today,
-    });
+  const completeLesson = (lessonId: string) => {
+    if (saved.completed.includes(lessonId)) return;
+    save({ ...saved, completed: [...saved.completed, lessonId] });
   };
 
   const finishOnboarding = (name: string) => {
